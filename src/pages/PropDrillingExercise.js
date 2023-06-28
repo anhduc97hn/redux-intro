@@ -4,6 +4,7 @@ import productOne from "../images/product1.gif";
 import productTwo from "../images/product2.gif";
 import ReactJson from "react-json-view";
 import WrapperBox from "../components/WrapperBox"
+import { current } from "@reduxjs/toolkit";
 
 
 
@@ -29,11 +30,49 @@ const RootComponent = (props) => {
   // Example newProduct = { id: "p1", title: "Product 1", price: 1999 }
   // The function will add one new product into the cart
 
+const addProductToCart = (newProduct) => {
+ 
+  const newProductList = cart.products.map((cardProduct) => {
+    if (cardProduct.id === newProduct.id) {
+      cardProduct.qty += 1;
+      cardProduct.price += newProduct.price;
+    }
+    return cardProduct;
+  });
+
+  const newTotalPrice = newProductList.reduce((acc, current) => {
+    return acc + current.price;
+  }, 0);
+
+  setCart({ products: newProductList, totalPrice: newTotalPrice });
+};
 
   // Step 2
   // Write a function called removeProductFromCart() that takes a product object as an argument
   // Example removedProduct = { id: "p1", title: "Product 1", price: 1999 }
   // The function will remove one product from the cart. The min value of quantity is 0
+
+// const removeProductFromCart = (props) => {
+//   const currentCart = cart.filter(props.id !== c.id);
+//   setCart(currentCart);
+//   // Handle quantity as well 
+// };
+
+const removeProductFromCart = (removedProduct) => {
+  const newProductList = cart.products.map((cardProduct) => {
+    if (cardProduct.id === removedProduct.id && cardProduct.qty > 0) {
+      cardProduct.qty -= 1;
+      cardProduct.price -= removedProduct.price
+    }
+    return cardProduct; 
+  });
+
+  const newTotalPrice = newProductList.reduce((acc, current) => {
+    return acc + current.price;
+  }, 0)
+
+  setCart({ products: newProductList, totalPrice: newTotalPrice })
+}
 
   // Step 3
   // Pass the functions to the product components to handle the click event of the Add/Remove buttons
@@ -57,7 +96,7 @@ const RootComponent = (props) => {
       </Box>
       <Grid container spacing={2} p="1rem">
         <Grid item md={6}>
-          <ProductPage products={products} />
+          <ProductPage products={products} addProductToCart={addProductToCart} removeProductFromCart={removeProductFromCart} />
         </Grid>
         <Grid item md={6}>
           <CartPage cart={cart} />
@@ -78,10 +117,10 @@ const ProductPage = (props) => {
       </Typography>
       <Grid container spacing={2} p="1rem">
         <Grid item sm={6}>
-          <ProductOne product={props.products[0]} />
+          <ProductOne product={props.products[0]} addProductToCart={props.addProductToCart} removeProductFromCart={props.removeProductFromCart} />
         </Grid>
         <Grid item sm={6}>
-          <ProductTwo product={props.products[1]} />
+          <ProductTwo product={props.products[1]} addProductToCart={props.addProductToCart} removeProductFromCart={props.removeProductFromCart} />
         </Grid>
       </Grid>
     </WrapperBox>
@@ -89,6 +128,9 @@ const ProductPage = (props) => {
 };
 
 const CartPage = (props) => {
+
+// reduce cart total price and store it to the current cart array. 
+
   return (
     <WrapperBox>
       <Typography p="0.5rem" variant="h5" sx={{ backgroundColor: "primary.main", color: "primary.contrastText" }}>
@@ -126,10 +168,10 @@ const ProductOne = (props) => {
         </Grid>
         <Grid item xs={8} >
           <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <Button variant="success" sx={{ width: "5rem" }} >
+            <Button variant="success" sx={{ width: "5rem" }} onClick={() => props.addProductToCart(props.product)}>
               Add
             </Button>
-            <Button variant="error" sx={{ width: "5rem" }}>
+            <Button variant="error" sx={{ width: "5rem" }} onClick={() => props.removeProductFromCart(props.product)} >
               Remove
             </Button>
           </div>
@@ -155,10 +197,10 @@ const ProductTwo = (props) => {
         </Grid>
         <Grid item xs={8} >
           <div style={{ display: "flex", justifyContent: "space-between" }}>
-            <Button variant="success" size="sm" style={{ width: "5rem" }}>
+            <Button variant="success" size="sm" style={{ width: "5rem" }} onClick={() => props.addProductToCart(props.product)}>
               Add
             </Button>
-            <Button variant="error" size="sm" style={{ width: "5rem" }}>
+            <Button variant="error" size="sm" style={{ width: "5rem" }} onClick={() => props.removeProductFromCart(props.product)}>
               Remove
             </Button>
           </div>
@@ -169,6 +211,9 @@ const ProductTwo = (props) => {
 };
 
 const CartProductOne = (props) => {
+
+  // reduce product price and store it to current array.
+
   return (
     <WrapperBox>
       <Typography p="0.5rem" variant="h5" sx={{ backgroundColor: "primary.main", color: "primary.contrastText" }}>
@@ -185,6 +230,9 @@ const CartProductOne = (props) => {
 };
 
 const CartProductTwo = (props) => {
+
+  // reduce product price and store it to current array. 
+
   return (
     <WrapperBox>
       <Typography p="0.5rem" variant="h5" sx={{ backgroundColor: "primary.main", color: "primary.contrastText" }}>
